@@ -1,5 +1,7 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
+import { readFileSync } from "fs";
+const sqlSchema = readFileSync("./schema.sql", "utf-8");
 
 const REGION = process.env.REGION || "us-east-1";
 const MODEL_ID = "anthropic.claude-3-haiku-20240307-v1:0";
@@ -26,8 +28,11 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         messages: [
           {
             role: "user",
-            content: [{ type: "text", text: prompt }],
-          },
+            content: [
+              { type: "text", text: `Aqui está o schema ao qual você deve se basear: ${sqlSchema}` },
+              { type: "text", text: prompt }
+            ],
+          },          
         ],
         system: "Você é um especialista em bancos de dados relacionais que cria queries SQL precisas e otimizadas.",
       }),
